@@ -7,15 +7,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 // builder.Services.AddOpenApi();
 
-builder.Services.AddAuthentication("Bearer")
-    .AddJwtBearer("Bearer", options =>
-    {
-        options.Authority = "http://meu-auth-service";
-        options.Audience = "estoque_api";
-    });
-
-builder.Services.AddAuthorization();
-
 builder.Services.AddDbContext<EstoqueContexto>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ConexaoPadrao")));
 
@@ -33,9 +24,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
 
 app.MapControllers();
 
