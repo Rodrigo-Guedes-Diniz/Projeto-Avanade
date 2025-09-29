@@ -16,6 +16,5 @@ namespace ProjetoAvanade.Infraestrutura.Db
 
         public DbSet<Produto> Produtos { get; set; }
         
-        public DbSet<Usuario> Usuarios { get; set; }
     }
 }

@@ -38,7 +38,7 @@ namespace Venda_Servico.Infraestrutura.Services
                 exchange: "",
                 routingKey: fila,
                 mandatory: false,
-                body: Encoding.UTF8.GetBytes("Mensagem teste")
+                body: Encoding.UTF8.GetBytes(json)
             );
         }
     }

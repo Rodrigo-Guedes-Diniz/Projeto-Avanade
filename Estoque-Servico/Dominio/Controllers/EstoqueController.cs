@@ -20,14 +20,13 @@ namespace ProjetoAvanade.Dominio.Controllers
             _context = context;
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPost("cadastrar")]
-        public IActionResult Cadastrar(ProdutoDTO dto)
+        public IActionResult Cadastrar(Produto produto)
         {
-            _context.Add(dto);
+            _context.Add(produto);
             _context.SaveChanges();
             // return CreatedAction(nameof(ObterPorId), new { id = produto.Id}, produto)
-            return Ok(dto);
+            return Ok(produto);
         }
 
         [HttpGet("{id}")]
@@ -57,7 +56,6 @@ namespace ProjetoAvanade.Dominio.Controllers
             return Ok(produtos);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPut("atualizar")]
         public IActionResult Atualizar(int id, ProdutoDTO dto)
         {
