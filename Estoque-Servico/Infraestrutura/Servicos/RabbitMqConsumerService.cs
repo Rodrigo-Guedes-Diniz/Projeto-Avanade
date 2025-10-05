@@ -9,6 +9,8 @@ using EstoqueServico.Dominio.DTO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ProjetoAvanade.Dominio.DTO;
+using ProjetoAvanade.Dominio.Entidades;
 using ProjetoAvanade.Infraestrutura.Db;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -53,8 +55,13 @@ namespace EstoqueServico.Infraestrutura.Servicos
                 {
                     var venda = JsonSerializer.Deserialize<PedidoDTO>(message);
 
+                    Console.WriteLine($"Mensagem recebida: {message}");
+
                     if (venda != null)
                     {
+
+                        Console.WriteLine($"Produto ID: {venda.ProdutoId}, Quantidade vendida: {venda.QuantidadeVendida}");
+
                         using (var scope = _serviceProvider.CreateScope())
                         {
                             var db = scope.ServiceProvider.GetRequiredService<EstoqueContexto>();
@@ -64,8 +71,18 @@ namespace EstoqueServico.Infraestrutura.Servicos
                             {
                                 produto.Quantidade -= venda.QuantidadeVendida;
                                 db.SaveChanges();
+
+                                Console.WriteLine($"✅ Estoque atualizado! Novo saldo: {produto.Quantidade}");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"⚠️ Produto ID {venda.ProdutoId} não encontrado no banco.");
                             }
                         }
+                    }
+                    else
+                    {
+                        Console.WriteLine("⚠️ Objeto venda está nulo após desserialização.");
                     }
                 }
                 catch (Exception ex)
@@ -74,6 +91,8 @@ namespace EstoqueServico.Infraestrutura.Servicos
                 }
 
                 await channel.BasicAckAsync(args.DeliveryTag, multiple: false);
+
+
             };
 
             await channel.BasicConsumeAsync("fila_pedidos", autoAck: false, consumer: consumer);

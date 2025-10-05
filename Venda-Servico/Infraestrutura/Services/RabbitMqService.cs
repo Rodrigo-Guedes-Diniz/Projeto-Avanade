@@ -39,7 +39,7 @@ namespace Venda_Servico.Infraestrutura.Services
 
             await channel.BasicPublishAsync(
                 exchange: "",
-                routingKey: fila,
+                routingKey: "fila_pedidos",
                 mandatory: false,
                 body: Encoding.UTF8.GetBytes(json)
             );

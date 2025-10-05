@@ -23,6 +23,8 @@ builder.Services.AddDbContext<EstoqueContexto>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
+builder.Services.AddHostedService<EstoqueServico.Infraestrutura.Servicos.RabbitMqConsumerService>();
+
 // Deve vir depoi de todos os serviços declarados
 var app = builder.Build();
 
