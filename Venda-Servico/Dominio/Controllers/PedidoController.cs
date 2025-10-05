@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Venda_Servico.Dominio.DTO;
 using Venda_Servico.Infraestrutura.Services;
@@ -10,6 +11,7 @@ namespace Venda_Servico.Dominio.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class PedidoController : ControllerBase
     {
         private static readonly List<PedidoDTO> _pedidos = new();

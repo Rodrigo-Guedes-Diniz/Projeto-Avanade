@@ -1,0 +1,59 @@
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/api/pedido/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5002
+        }
+      ],
+      "UpstreamPathTemplate": "/vendas/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post" ],
+      "Priority": 1
+    },
+    {
+      "DownstreamPathTemplate": "/api/estoque/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5001
+        }
+      ],
+      "UpstreamPathTemplate": "/estoque/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post" ],
+      "Priority": 1
+    },
+    {
+      "DownstreamPathTemplate": "/swagger/v1/swagger.json",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5001
+        }
+      ],
+      "UpstreamPathTemplate": "/swagger/estoque/swagger.json",
+      "UpstreamHttpMethod": [ "Get" ],
+      "Priority": 100
+    },
+    {
+      "DownstreamPathTemplate": "/swagger/v1/swagger.json",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5002
+        }
+      ],
+      "UpstreamPathTemplate": "/swagger/vendas/swagger.json",
+      "UpstreamHttpMethod": [ "Get" ],
+      "Priority": 100 
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:5000"
+  }
+}

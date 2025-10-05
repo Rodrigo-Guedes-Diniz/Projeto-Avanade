@@ -35,3 +35,11 @@ C:\Work\Projects\C#\Bootcamp DIO\Projeto-Avanade\Venda-Servico\obj\Debug\net9.0\
 C:\Work\Projects\C#\Bootcamp DIO\Projeto-Avanade\Venda-Servico\bin\Debug\net9.0\Swashbuckle.AspNetCore.Swagger.dll
 C:\Work\Projects\C#\Bootcamp DIO\Projeto-Avanade\Venda-Servico\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 C:\Work\Projects\C#\Bootcamp DIO\Projeto-Avanade\Venda-Servico\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Work\Projects\C#\Bootcamp DIO\Projeto-Avanade\Venda-Servico\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Work\Projects\C#\Bootcamp DIO\Projeto-Avanade\Venda-Servico\bin\Debug\net9.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Work\Projects\C#\Bootcamp DIO\Projeto-Avanade\Venda-Servico\bin\Debug\net9.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Work\Projects\C#\Bootcamp DIO\Projeto-Avanade\Venda-Servico\bin\Debug\net9.0\Microsoft.IdentityModel.Logging.dll
+C:\Work\Projects\C#\Bootcamp DIO\Projeto-Avanade\Venda-Servico\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.dll
+C:\Work\Projects\C#\Bootcamp DIO\Projeto-Avanade\Venda-Servico\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Work\Projects\C#\Bootcamp DIO\Projeto-Avanade\Venda-Servico\bin\Debug\net9.0\Microsoft.IdentityModel.Tokens.dll
+C:\Work\Projects\C#\Bootcamp DIO\Projeto-Avanade\Venda-Servico\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll

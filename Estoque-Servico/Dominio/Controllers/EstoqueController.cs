@@ -13,6 +13,7 @@ namespace ProjetoAvanade.Dominio.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class EstoqueController : ControllerBase
     {
 
