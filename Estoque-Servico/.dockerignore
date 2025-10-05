@@ -1,0 +1,25 @@
+# Ignora pastas de binários de compilação C#
+**/bin/
+**/obj/
+
+# Ignora pastas e arquivos que o Git já ignora
+.git
+.gitignore
+
+# Ignora o arquivo de solução e outros arquivos de IDE
+*.sln
+*.suo
+*.user
+*.vs/
+.vscode/
+
+# Ignora a pasta de pacotes NuGet se estiver no mesmo nível
+# Se você tiver uma pasta "packages" ou "nuget_cache" na raiz, adicione aqui
+# packages/
+
+# Ignora o Docker Compose (se estiver sendo copiado para o contexto, o que é raro)
+docker-compose.yml
+docker-compose.*.yml
+
+# Ignora a pasta do WSL/Docker Desktop se for o caso
+.docker

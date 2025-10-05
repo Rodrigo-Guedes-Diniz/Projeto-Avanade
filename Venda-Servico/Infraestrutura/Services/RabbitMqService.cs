@@ -16,7 +16,10 @@ namespace Venda_Servico.Infraestrutura.Services
         {
             _factory = new ConnectionFactory()
             {
-                HostName = "localhost"
+                HostName = Environment.GetEnvironmentVariable("RABBITMQ__HOST") ?? "localhost",
+                Port = 5672,
+                UserName = Environment.GetEnvironmentVariable("RABBITMQ__USERNAME") ?? "guest",
+                Password = Environment.GetEnvironmentVariable("RABBITMQ__PASSWORD") ?? "guest"
             };
         }
 
@@ -25,7 +28,7 @@ namespace Venda_Servico.Infraestrutura.Services
             await using var connection = await _factory.CreateConnectionAsync();
             await using var channel = await connection.CreateChannelAsync();
 
-            await channel.QueueDeclareAsync(queue: fila,
+            await channel.QueueDeclareAsync(queue: "fila_pedidos",
                                         durable: false,
                                         exclusive: false,
                                         autoDelete: false,

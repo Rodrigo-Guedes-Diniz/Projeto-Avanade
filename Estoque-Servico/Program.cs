@@ -1,5 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using ProjetoAvanade.Infraestrutura.Db;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+
+// Estas são necessárias para BackgroundService:
+using Microsoft.Extensions.Hosting; 
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 

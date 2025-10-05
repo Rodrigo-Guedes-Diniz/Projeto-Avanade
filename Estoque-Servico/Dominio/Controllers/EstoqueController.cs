@@ -10,6 +10,9 @@ using ProjetoAvanade.Infraestrutura.Db;
 
 namespace ProjetoAvanade.Dominio.Controllers
 {
+
+    [ApiController]
+    [Route("api/[controller]")]
     public class EstoqueController : ControllerBase
     {
 
@@ -55,6 +58,21 @@ namespace ProjetoAvanade.Dominio.Controllers
             var produtos = _context.Produtos.Where(x => x.Nome.Contains(nome));
             return Ok(produtos);
         }
+
+        [HttpGet("validar/{id}/{quantidade}")]
+        public IActionResult ValidarEstoque(int id, int quantidade)
+        {
+            var produto = _context.Produtos.Find(id);
+
+            if (produto == null)
+                return NotFound("Produto não encontrado.");
+
+            if (produto.Quantidade < quantidade)
+                return BadRequest("Estoque insuficiente.");
+
+            return Ok(new { mensagem = "Estoque disponível", produto });
+        }
+
 
         [HttpPut("atualizar")]
         public IActionResult Atualizar(int id, ProdutoDTO dto)

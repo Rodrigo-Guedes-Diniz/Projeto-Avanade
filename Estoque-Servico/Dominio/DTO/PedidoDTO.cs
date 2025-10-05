@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace EstoqueServico.Dominio.DTO
 {
-    public class VendaMessageDTO
+    public class PedidoDTO
     {
         public int ProdutoId { get; set; }
-        public int Quantidade { get; set; }
+        public int QuantidadeVendida { get; set; }
     }
 }

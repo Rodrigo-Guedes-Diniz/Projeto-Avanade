@@ -1,0 +1,48 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - microservicos_net
+
+  venda-servico:
+    build:
+      context: ./Venda-Servico
+      dockerfile: Dockerfile
+    container_name: venda-service
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ__HOST=rabbitmq
+      - RABBITMQ__USERNAME=guest
+      - RABBITMQ__PASSWORD=guest
+    ports:
+      - "5194:80"
+    networks:
+      - microservicos_net
+
+  estoque-servico:
+    build:
+      context: ./Estoque-Servico
+      dockerfile: Dockerfile
+    container_name: estoque-service
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ__HOST=rabbitmq
+      - RABBITMQ__USERNAME=guest
+      - RABBITMQ__PASSWORD=guest
+    ports:
+      - "5001:80"
+    networks:
+      - microservicos_net
+
+networks:
+  microservicos_net:
+    driver: bridge
