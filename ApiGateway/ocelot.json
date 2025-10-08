@@ -4,10 +4,7 @@
       "DownstreamPathTemplate": "/api/pedido/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5002
-        }
+        { "Host": "localhost", "Port": 5002 }
       ],
       "UpstreamPathTemplate": "/vendas/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post" ],
@@ -17,10 +14,7 @@
       "DownstreamPathTemplate": "/api/estoque/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5001
-        }
+        { "Host": "localhost", "Port": 5001 }
       ],
       "UpstreamPathTemplate": "/estoque/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post" ],
@@ -30,10 +24,7 @@
       "DownstreamPathTemplate": "/swagger/v1/swagger.json",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5001
-        }
+        { "Host": "localhost", "Port": 5001 }
       ],
       "UpstreamPathTemplate": "/swagger/estoque/swagger.json",
       "UpstreamHttpMethod": [ "Get" ],
@@ -43,14 +34,33 @@
       "DownstreamPathTemplate": "/swagger/v1/swagger.json",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5002
-        }
+        { "Host": "localhost", "Port": 5002 }
       ],
       "UpstreamPathTemplate": "/swagger/vendas/swagger.json",
       "UpstreamHttpMethod": [ "Get" ],
-      "Priority": 100 
+      "Priority": 100
+    }
+  ],
+  "SwaggerEndPoints": [
+    {
+      "Key": "estoque",
+      "Config": [
+        {
+          "Name": "Estoque API",
+          "Version": "v1",
+          "Url": "http://localhost:5000/swagger/estoque/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "vendas",
+      "Config": [
+        {
+          "Name": "Vendas API",
+          "Version": "v1",
+          "Url": "http://localhost:5000/swagger/vendas/swagger.json"
+        }
+      ]
     }
   ],
   "GlobalConfiguration": {

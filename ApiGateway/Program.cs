@@ -1,118 +1,108 @@
-using Ocelot.DependencyInjection;
-using Ocelot.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
-using ApiGateway.Services; // Usado para IJwtGenerator e JwtGenerator
-using Microsoft.AspNetCore.Mvc; // Necessário para AddControllers
-
-// Este arquivo assume que você tem um arquivo 'ocelot.json' configurado na raiz do projeto
+using ApiGateway.Services;
+using MMLib.SwaggerForOcelot;
+using MMLib.SwaggerForOcelot.Middleware;
+using Ocelot.DependencyInjection;
+using Ocelot.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --------------------------------------------------------
-// 1. Configuração do Ocelot
-// --------------------------------------------------------
+// 1️⃣ Carrega o arquivo ocelot.json
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
-builder.Services.AddOcelot();
 
-// --------------------------------------------------------
-// 2. Configuração do JWT (Bearer Authentication)
-// --------------------------------------------------------
+// 2️⃣ Configura Ocelot + SwaggerForOcelot
+builder.Services.AddOcelot(builder.Configuration);
+builder.Services.AddSwaggerForOcelot(builder.Configuration);
+
+// 3️⃣ Configura JWT
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var key = Encoding.ASCII.GetBytes(jwtSettings["SecretKey"] ?? throw new InvalidOperationException("Chave JWT não configurada."));
+var secretKey = jwtSettings["SecretKey"] 
+    ?? throw new InvalidOperationException("JwtSettings:SecretKey não configurada.");
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = false; // Mudar para true em produção
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
+builder.Services
+    .AddAuthentication(options =>
     {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false,
-        ValidateAudience = false,
-    };
-});
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey)),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
 
-// --------------------------------------------------------
-// 3. Registro de DI e Controllers
-// --------------------------------------------------------
-
-// Registra a Injeção de Dependência do Gerador JWT
+// 4️⃣ DI e MVC
 builder.Services.AddScoped<IJwtGenerator, JwtGenerator>();
+builder.Services.AddControllers();
 
-// ADICIONA O SUPORTE A CONTROLLERS (ISSO RESOLVE O "NO OPERATIONS DEFINED")
-builder.Services.AddControllers(); 
-
-// --------------------------------------------------------
-// 4. Configuração do Swagger/OpenAPI
-// --------------------------------------------------------
+// 5️⃣ Swagger local do gateway
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Gateway API", Version = "v1" });
-    
-    // Configuração para incluir o botão de Autorização JWT
-    var securityScheme = new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "API Gateway", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
+        Description = "Autenticação JWT. Exemplo: 'Bearer {token}'",
         Name = "Authorization",
-        Description = "Insira o token JWT no formato 'Bearer {token}'",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
-    };
-    c.AddSecurityDefinition("Bearer", securityScheme);
-
-    var securityRequirement = new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            new OpenApiSecurityScheme
             {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
             },
             Array.Empty<string>()
         }
-    };
-    c.AddSecurityRequirement(securityRequirement);
+    });
 });
 
-// --------------------------------------------------------
-// 5. Inicialização do App
-// --------------------------------------------------------
 var app = builder.Build();
 
-// --------------------------------------------------------
-// 6. Habilitar Middleware
-// --------------------------------------------------------
+// 6️⃣ Middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Gateway API v1");
-        // Seus serviços downstream (Estoque, Vendas) devem ser adicionados aqui posteriormente
-        c.SwaggerEndpoint("/swagger/vendas/swagger.json", "Serviço de Vendas");
-        c.SwaggerEndpoint("/swagger/estoque/swagger.json", "Serviço de Estoque");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Gateway v1");
+    });
+
+    app.UseSwaggerForOcelotUI(opt =>
+    {
+        opt.PathToSwaggerGenerator = "/swagger/docs";
     });
 }
 
 app.UseHttpsRedirection();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Mapeia os Controllers (IMPORTANTE!)
-app.MapControllers(); 
+app.MapWhen(context => context.Request.Path.StartsWithSegments("/api/auth"), appBuilder =>
+{
+    appBuilder.UseRouting();
+    appBuilder.UseAuthentication();
+    appBuilder.UseAuthorization();
+    appBuilder.UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllers();
+    });
+});
 
-// O Ocelot DEVE ser o último middleware de roteamento a ser executado
-await app.UseOcelot(); 
+await app.UseOcelot();
 
 app.Run();
