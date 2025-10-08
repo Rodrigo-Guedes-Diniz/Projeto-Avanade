@@ -1,10 +1,9 @@
+// Program.cs (Estoque Service)
 using Microsoft.EntityFrameworkCore;
 using ProjetoAvanade.Infraestrutura.Db;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-
-// Estas são necessárias para BackgroundService:
-using Microsoft.Extensions.Hosting; 
+using Microsoft.Extensions.Hosting;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -15,6 +14,7 @@ using System;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
+using EstoqueServico.Dominio.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +22,8 @@ builder.Services.AddDbContext<EstoqueContexto>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ConexaoPadrao")));
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var key = Encoding.ASCII.GetBytes(jwtSettings["SecretKey"] ?? throw new InvalidOperationException("Chave JWT não configurada."));
+var secret = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("Chave JWT não configurada.");
+var signingKey = CryptoHelper.BuildKeyFromConfig(secret);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -35,12 +36,14 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
+        IssuerSigningKey = signingKey,
         ValidateIssuer = false,
         ValidateAudience = false,
         RoleClaimType = ClaimTypes.Role
     };
 });
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -72,17 +75,14 @@ builder.Services.AddSwaggerGen(c =>
     c.AddSecurityRequirement(securityRequirement);
 });
 
-
 builder.Services.AddControllers();
 builder.Services.AddHostedService<EstoqueServico.Infraestrutura.Servicos.RabbitMqConsumerService>();
 
-// Deve vir depoi de todos os serviços declarados
 var app = builder.Build();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

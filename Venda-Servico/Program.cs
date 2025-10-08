@@ -1,9 +1,11 @@
+// Program.cs (Vendas Service)
 using Venda_Servico.Infraestrutura.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
-using Microsoft.OpenApi.Models; // Necessário para a configuração do Swagger/JWT
+using Microsoft.OpenApi.Models;
+using VendaServico.Dominio.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Configuração do JWT (Bearer Authentication)
 // ----------------------------------------------------
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-// Atenção: Use a mesma chave que você definiu no APIGateway
-var key = Encoding.ASCII.GetBytes(jwtSettings["SecretKey"] ?? throw new InvalidOperationException("Chave JWT não configurada."));
+var secret = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("Chave JWT não configurada.");
+var signingKey = CryptoHelper.BuildKeyFromConfig(secret);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -25,12 +27,14 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
+        IssuerSigningKey = signingKey,
         ValidateIssuer = false,
         ValidateAudience = false,
         RoleClaimType = ClaimTypes.Role
     };
 });
+
+builder.Services.AddAuthorization();
 
 // ----------------------------------------------------
 // Serviços do Projeto
@@ -42,7 +46,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSingleton<RabbitMqService>();
 builder.Services.AddHttpClient();
 
-
 // ----------------------------------------------------
 // Configuração do SWAGGER/OPENAPI
 // ----------------------------------------------------
@@ -50,7 +53,6 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Vendas Service API", Version = "v1" });
 
-    // 1. Define o esquema de segurança (Bearer Token)
     var securityScheme = new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -61,7 +63,6 @@ builder.Services.AddSwaggerGen(c =>
     };
     c.AddSecurityDefinition("Bearer", securityScheme);
 
-    // 2. Aplica o requisito de segurança a todos os endpoints
     var securityRequirement = new OpenApiSecurityRequirement
     {
         {
@@ -78,7 +79,6 @@ builder.Services.AddSwaggerGen(c =>
     };
     c.AddSecurityRequirement(securityRequirement);
 });
-
 
 var app = builder.Build();
 

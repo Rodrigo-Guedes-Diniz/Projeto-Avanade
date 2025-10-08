@@ -1,3 +1,4 @@
+// Program.cs (ApiGateway)
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -7,6 +8,7 @@ using MMLib.SwaggerForOcelot;
 using MMLib.SwaggerForOcelot.Middleware;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using ApiGateway.Dominio.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +24,9 @@ var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"] 
     ?? throw new InvalidOperationException("JwtSettings:SecretKey não configurada.");
 
+// usa o helper para criar a key
+var signingKey = CryptoHelper.BuildKeyFromConfig(secretKey);
+
 builder.Services
     .AddAuthentication(options =>
     {
@@ -35,11 +40,13 @@ builder.Services
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey)),
+            IssuerSigningKey = signingKey,
             ValidateIssuer = false,
             ValidateAudience = false
         };
     });
+
+builder.Services.AddAuthorization();
 
 // 4️⃣ DI e MVC
 builder.Services.AddScoped<IJwtGenerator, JwtGenerator>();
